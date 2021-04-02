@@ -22,7 +22,7 @@ export class MeetingCreateSuccessComponent implements OnInit, OnDestroy {
    subReportsStats: Subscription;
 
    constructor(private route: ActivatedRoute, private reportsService: ReportsService) { }
-
+   // { totalHours: '0:45:00', repostsCount: '1', limitHours: '15' }
    ngOnInit(): void {
       // this.subReportsStats = this.route.data
       this.reportsService.getMountlyStats()
@@ -38,6 +38,10 @@ export class MeetingCreateSuccessComponent implements OnInit, OnDestroy {
             //  console.log(result);
             this.progress = result >= 100 ? `${String(100)}%` : `${String(result)}%`
          });
+   }
+
+   resetReportingSeccess() {
+      this.reportsService.setReportingSuccess(false)
    }
 
 

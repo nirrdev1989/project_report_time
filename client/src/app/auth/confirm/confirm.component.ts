@@ -9,92 +9,91 @@ import { LoaderService } from "src/app/services/loader.service";
 import { FormsService } from "../../services/forms/forms.service";
 
 @Component({
-    selector: "app-confirm",
-    templateUrl: "./confirm.component.html",
-    styleUrls: ["./confirm.component.scss"],
+   selector: "app-confirm",
+   templateUrl: "./confirm.component.html",
+   styleUrls: ["./confirm.component.scss"],
 })
 export class ConfirmComponent implements AfterViewInit, OnDestroy, OnInit {
 
-    isValidTime: boolean = true
-    confirmCodeExpireTime: number
-    subFormChange: Subscription
-    subTimer: Subscription
+   isValidTime: boolean = true
+   confirmCodeExpireTime: number
+   subFormChange: Subscription
+   subTimer: Subscription
 
 
-    @ViewChild('form') form: NgForm
-    @ViewChild('first') firstInput: ElementRef
+   @ViewChild('form') form: NgForm
+   @ViewChild('first') firstInput: ElementRef
 
-    constructor(
-        public formsService: FormsService,
-        private authService: AuthService,
-        private router: Router,
-        private loaderService: LoaderService) { }
-
-
-    ngOnInit(): void {
-        this.confirmCodeExpireTime = this.authService.getConfimCodeExpire()
-        this.setTimer(this.confirmCodeExpireTime)
-    }
+   constructor(
+      public formsService: FormsService,
+      private authService: AuthService,
+      private router: Router,
+      private loaderService: LoaderService) { }
 
 
-    ngAfterViewInit(): void {
-        this.subFormChange = this.form.valueChanges.subscribe((result) => {
-            if (this.form.invalid) return
-            else if (this.form.valid) {
-                let code: string = "";
+   ngOnInit(): void {
+      this.confirmCodeExpireTime = this.authService.getConfimCodeExpire()
+      this.setTimer(this.confirmCodeExpireTime)
+   }
 
-                for (const num in this.form.value) {
-                    code += this.form.value[num]
-                }
 
-                const codeToSend: ConfirmCode = {
-                    code: code
-                };
+   ngAfterViewInit(): void {
+      this.subFormChange = this.form.valueChanges.subscribe((result) => {
+         if (this.form.invalid) return
+         else if (this.form.valid) {
+            let code: string = "";
 
-                this.loaderService.setStatus(true)
-                this.authService.confirmCode(codeToSend.code)
-                    .subscribe((result) => {
-                        this.router.navigate(["main/teacher"])
-                        this.form.resetForm()
-                    }, () => {
-                        this.form.resetForm()
-                        this.firstInput.nativeElement.focus()
-                        this.firstInput.nativeElement.blur()
-                    });
+            for (const num in this.form.value) {
+               code += this.form.value[num]
             }
-        })
-    }
+
+            const codeToSend: ConfirmCode = {
+               code: code
+            };
+
+            this.loaderService.setStatus(true)
+            this.authService.confirmCode(codeToSend.code)
+               .subscribe((result) => {
+                  this.router.navigate(["main/teacher"])
+                  this.form.resetForm()
+               }, () => {
+                  this.form.resetForm()
+                  this.firstInput.nativeElement.focus()
+                  this.firstInput.nativeElement.blur()
+               });
+         }
+      })
+   }
 
 
-    onResendConfirmCode(): void {
-        this.loaderService.setStatus(true)
-        this.setTimer(this.confirmCodeExpireTime)
-        this.authService.resendConfirmCode().subscribe((result) => {
-            this.form.resetForm()
-
-            alert(result)
-        });
-    }
-
-
-    onClear(): void {
-        this.form.resetForm()
-    }
+   onResendConfirmCode(): void {
+      this.loaderService.setStatus(true)
+      this.setTimer(this.confirmCodeExpireTime)
+      this.authService.resendConfirmCode().subscribe((result) => {
+         this.form.resetForm()
+         alert(result)
+      });
+   }
 
 
-    setTimer(limit: number): void {
-        this.subTimer = interval(1000)
-            .pipe(
-                takeWhile((result) => result <= limit)
-            )
-            .subscribe((result) => {
-                this.isValidTime = result === this.confirmCodeExpireTime ? false : true
-            })
-    }
+   onClear(): void {
+      this.form.resetForm()
+   }
 
 
-    ngOnDestroy(): void {
-        this.subFormChange.unsubscribe()
-        this.subTimer.unsubscribe()
-    }
+   setTimer(limit: number): void {
+      this.subTimer = interval(1000)
+         .pipe(
+            takeWhile((result) => result <= limit)
+         )
+         .subscribe((result) => {
+            this.isValidTime = result === this.confirmCodeExpireTime ? false : true
+         })
+   }
+
+
+   ngOnDestroy(): void {
+      this.subFormChange.unsubscribe()
+      this.subTimer.unsubscribe()
+   }
 }

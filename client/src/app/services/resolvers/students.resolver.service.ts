@@ -8,19 +8,16 @@ import { StudentsService } from '../students.service';
 
 
 @Injectable({
-    providedIn: 'root'
+   providedIn: 'root'
 })
 export class StudentsResolverService implements Resolve<Student[]> {
 
-    constructor(private studentsService: StudentsService, private loaderService: LoaderService) { }
+   constructor(private studentsService: StudentsService, private loaderService: LoaderService) { }
 
-    resolve(): Observable<Student[]> {
-        // this.loaderService.setStatus(true)
-        console.log('STUDENTS RESOLVER START')
-
-        return this.studentsService.getStudents()
-            .pipe(
-                tap(() => this.loaderService.setStatus(false))
-            )
-    }
+   resolve(): Observable<Student[]> {
+      return this.studentsService.getStudents()
+         .pipe(
+            tap(() => this.loaderService.setStatus(false))
+         )
+   }
 }

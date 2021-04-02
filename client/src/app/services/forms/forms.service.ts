@@ -2,42 +2,24 @@ import { Injectable } from '@angular/core';
 import { AbstractControl, FormControl } from '@angular/forms';
 
 @Injectable({
-    providedIn: 'root'
+   providedIn: 'root'
 })
 export class FormsService {
 
-    constructor() { }
+   constructor() { }
 
-    formControlStatus(control: FormControl): boolean {
-        // console.log(control)
-        if (control.invalid && (control.dirty || control.touched)) {
-            return true;
-        }
-        return false;
-    }
-
+   formControlStatus(control: FormControl): boolean {
+      if (control.invalid && (control.dirty || control.touched)) {
+         return true;
+      }
+      return false;
+   }
 
 
-    displayClass(input: AbstractControl): { [key: string]: boolean } {
-        return {
-            'is-valid': input.valid,
-            'is-invalid': input.touched && input.invalid
-        }
-    }
-
-
-
-    //  displayErrorMessage(control: FormControl): string {
-    //     if (control.hasError('required')) {
-    //         return 'This field is reqiured';
-    //     }
-    //     else if (control.hasError('minlength')) {
-    //         return 'To short';
-    //     }
-    //     else if (control.hasError('pattern')) {
-    //         return 'Invalid Pattern';
-    //     }
-    //     return '';
-    // }
-
+   displayClass(input: AbstractControl): { [key: string]: boolean } {
+      return {
+         'is-valid': input.valid,
+         'is-invalid': input.touched && input.invalid
+      }
+   }
 }

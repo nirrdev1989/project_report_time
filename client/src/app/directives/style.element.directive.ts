@@ -1,21 +1,19 @@
 import { Directive, OnInit, ElementRef, Input } from '@angular/core';
 
 @Directive({
-    selector: '[styleElement]'
+   selector: '[styleElement]'
 })
 export class StyleElementDirective implements OnInit {
 
-    @Input('styleElement') styleElement: string
-    @Input() selector: string
+   @Input('styleElement') styleElement: string
+   @Input() selector: string
 
-    constructor(
-        private element: ElementRef,
-        // private renderer: Renderer2, 
-        // private container: ViewContainerRef
-    ) { }
+   constructor(
+      private element: ElementRef,
+   ) { }
 
-    ngOnInit(): void {
-        const element = this.element.nativeElement.querySelector(this.selector)
-        element.classList.add(this.styleElement)
-    }
+   ngOnInit(): void {
+      const element = this.element.nativeElement.querySelector(this.selector)
+      element.classList.add(this.styleElement)
+   }
 }

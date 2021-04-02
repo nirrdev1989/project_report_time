@@ -1,32 +1,34 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { map, tap } from 'rxjs/operators';
 import { Student } from '../interfaces/Student';
 
 @Injectable({
-    providedIn: 'root'
+   providedIn: 'root'
 })
 export class StudentsService {
 
-    private students: Student[]
+   private students: Student[]
 
-    constructor(private http: HttpClient) {
+   constructor(private http: HttpClient) {
 
-    }
+   }
 
-    // GET STUDENTS LIST
-    getStudents(): Observable<Student[]> {
-        if (this.students) {
-            console.log('NO HTTP CALL STUDENTS')
-            return of(this.students);
-        }
-        return this.http.get<Student[]>("api/teacher/students", { withCredentials: true })
-            .pipe(
-                tap((result) => {
-                    this.students = result;
-                })
-            );
-    }
+   // GET STUDENTS LIST
+   getStudents(): Observable<Student[]> {
+      console.log(this.students)
+      if (this.students) {
+         return of(this.students);
+      }
+      return this.http.get<Student[]>("api/teacher/students")
+         .pipe(
+            map((result: any) => {
+               console.log(alert(JSON.stringify(result)))
+               this.students = result.toJson;
+               return result.toJson
+            })
+         );
+   }
 
 }

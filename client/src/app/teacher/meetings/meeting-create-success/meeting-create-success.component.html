@@ -1,35 +1,35 @@
 <div class="animate-center">
 
-    <app-header [styleElement]="'header-green'" [selector]="'#the-header'"></app-header>
-    <div class="succesContainer">
-        <div class="success">
-            <img src="../../../../assets/Group 1815.svg" alt>
-        </div>
-        <h3>מפגש נוצר בהצלחה</h3>
-        <div class="progressBar">
-            <div class="bar">
-                <div [ngStyle]="{width: progress}" class="progressTime"></div>
-            </div>
-        </div>
-        <p>עשית {{reporstStats?.totalHours}} שעות מתוך {{reporstStats?.limitHours}}</p>
-        <p> {{reporstStats?.limitHours}} שעות חונכות נדרשות לחודש
-            {{ currentMount | hebrewMountName}}</p>
-        <div class="thanksContent">
-            כל הכבוד!
-            <br>
-            תודה על העשייה ועל שיתוף הפעולה
-            <br>
-            <p>פרטי המפגש נשלחו להורה</p>
-            <p>
-                ניתן לעקוב אחרי
-                <span [routerLink]="['/main/teacher/meetings-table']">מפגשים שטרם אושרו</span>
-            </p>
-        </div>
-        <div class="endButton">
-            <img src="../../../../assets/Group 1789.svg" alt>
-            <button [routerLink]="['/main/teacher']" class="mainButton">
-                סיום
-            </button>
-        </div>
-    </div>
+   <app-header [styleElement]="'header-green'" [selector]="'#the-header'"></app-header>
+   <div class="succesContainer">
+      <div class="success">
+         <img src="../../../../assets/Group 1815.svg" alt>
+      </div>
+      <h3>מפגש נוצר בהצלחה</h3>
+      <div class="progressBar">
+         <div class="bar">
+            <div [ngStyle]="{width: progress}" class="progressTime"></div>
+         </div>
+      </div>
+      <p>עשית {{reporstStats?.totalHours}} שעות מתוך {{reporstStats?.limitHours}}</p>
+      <p> {{reporstStats?.limitHours}} שעות חונכות נדרשות לחודש
+         {{ currentMount | hebrewMountName}}</p>
+      <div class="thanksContent">
+         כל הכבוד!
+         <br>
+         תודה על העשייה ועל שיתוף הפעולה
+         <br>
+         <p>פרטי המפגש נשלחו להורה</p>
+         <p>
+            ניתן לעקוב אחרי
+            <a [routerLink]="['/main/teacher/meetings-table']" (click)="resetReportingSeccess()">מפגשים שטרם אושרו</a>
+         </p>
+      </div>
+      <div class="endButton">
+         <img src="../../../../assets/Group 1789.svg" alt>
+         <button [routerLink]="['/main/teacher']" class="mainButton" (click)="resetReportingSeccess()">
+            סיום
+         </button>
+      </div>
+   </div>
 </div>

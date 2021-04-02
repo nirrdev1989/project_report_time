@@ -6,14 +6,13 @@ import { ReportsService } from '../reports.service';
 
 
 @Injectable({
-    providedIn: 'root'
+   providedIn: 'root'
 })
 export class ReportsResolverService implements Resolve<Report[]> {
 
-    constructor(private reportsService: ReportsService) { }
+   constructor(private reportsService: ReportsService) { }
 
-    resolve(): Observable<Report[]> {
-        console.log('REPORTS RESOLVER START')
-        return this.reportsService.getReportsNotConfirm()
-    }
+   resolve(): Observable<Report[]> {
+      return this.reportsService.getReportsNotConfirm()
+   }
 }
