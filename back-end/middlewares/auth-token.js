@@ -1,6 +1,8 @@
 const keys = require('../config/keys')
 const JsonWebToken = require('jsonwebtoken')
 const { destroySession } = require('./auth-session')
+const createError = require('../helpers/error')
+const catchAsync = require('../helpers/catchAsync')
 
 /**
  * @param {*} request 
@@ -8,33 +10,50 @@ const { destroySession } = require('./auth-session')
  * @param {*} next
  * verify token - authorize  user
  */
-async function verifyToken(request, response, next) {
 
-    try {
-        const token = request.headers.authorization.split(' ')[1]
+exports.verifyToken = catchAsync(async function (request, response, next) {
 
-        const decodedToken = await JsonWebToken.verify(token, keys.TOKENS.ACCESS_TOKEN.secretTokenKey)
-        // console.log(decodedToken, 'DECODE TOKEN')
-        request.userData = {
-            teacherId: decodedToken.teacherId,
-            teacherEmail: decodedToken.teacherEmail,
-            teacherFirstName: decodedToken.teacherFirstName,
-        }
+   const token = request.cookies.jwt
 
-        Object.freeze(request.userData)
+   if (!token) {
+      destroySession(request)
+      next(createError(401, 'Unauthorized'))
+      return
+   }
 
-        next()
+   const decodedToken = await JsonWebToken.verify(token, keys.TOKENS.ACCESS_TOKEN.secretTokenKey)
 
-    } catch (error) {
-        destroySession(request)
-        console.log('Unauthorized user')
-        response.status(401).send({
-            message: 'Unauthorized',
-        })
-    }
+   if (!decodedToken || Object.keys(decodedToken).length === 0) {
+      destroySession(request)
+      next(createError(401, 'Unauthorized'))
+      return
+   }
 
-}
+   console.log(decodedToken, 'DECODE TOKEN')
+   console.log('IAT: ', new Date(decodedToken.iat))
+   console.log('EXP: ', new Date(decodedToken.exp))
+   request.userData = {
+      teacherId: decodedToken.teacherId,
+      // teacherEmail: decodedToken.teacherEmail,
+      // teacherFirstName: decodedToken.teacherFirstName,
+   }
 
-module.exports = {
-    verifyToken
-}
+   Object.freeze(request.userData)
+
+   // const { teacherEmail } = request.body;
+   // const query = `select A,B,C,D where C='${teacherEmail}'`;
+   // const sheetId = keys.GOOGLE_SHEETS.sheetsIds.teachers;
+
+   // const teacher = await googleSheetsService.find(
+   //    query,
+   //    sheetId,
+   //    request.sheetsClientData.authorizationToken
+   // );
+   // // console.log(teacher)
+
+   // if (!teacher || teacher.length === 0) {
+   //    next(createError(404, "משתמש לא נמצא"))
+   //    return
+   // }
+   next()
+})

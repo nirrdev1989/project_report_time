@@ -9,36 +9,36 @@ const JsonWebToken = require('jsonwebtoken')
  */
 async function verifyTokenSign(request, response, next) {
 
-    const { token } = request.body
+   const { token } = request.body
 
-    try {
-        const decodedToken = await JsonWebToken.verify(token, keys.TOKENS.PARENT_SIGN_ACCESS_TOKEN.secretTokenKey)
+   try {
+      const decodedToken = await JsonWebToken.verify(token, keys.TOKENS.PARENT_SIGN_ACCESS_TOKEN.secretTokenKey)
 
-        // console.log(decodedToken, 'DECODE')
+      // console.log(decodedToken, 'DECODE')
 
-        request.respotInfo = {
-            studentName: decodedToken.studentName,
-            ticketNo: decodedToken.ticketNo,
-            reportDate: decodedToken.reportDate,
-            reportActivitis: decodedToken.reportActivitis,
-            reportComments: decodedToken.reportComments,
-            reportStartTime: decodedToken.reportStartTime,
-            reportEndTime: decodedToken.reportEndTime,
-            reportRangeTimne: decodedToken.reportRangeTimne,
-            index: decodedToken.index,
-        }
+      request.respotInfo = {
+         studentName: decodedToken.studentName,
+         ticketNo: decodedToken.ticketNo,
+         reportDate: decodedToken.reportDate,
+         reportActivitis: decodedToken.reportActivitis,
+         reportComments: decodedToken.reportComments,
+         reportStartTime: decodedToken.reportStartTime,
+         reportEndTime: decodedToken.reportEndTime,
+         reportRangeTimne: decodedToken.reportRangeTimne,
+         index: decodedToken.index,
+      }
 
-        Object.freeze(request.respotInfo)
-        next()
+      Object.freeze(request.respotInfo)
+      next()
 
-    } catch (error) {
-        response.status(401).send({
-            message: 'Unauthorized',
-        })
-    }
+   } catch (error) {
+      response.status(401).send({
+         message: 'Unauthorized-Parent',
+      })
+   }
 }
 
 
 module.exports = {
-    verifyTokenSign
+   verifyTokenSign
 }
