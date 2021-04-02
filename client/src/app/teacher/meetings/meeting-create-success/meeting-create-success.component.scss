@@ -1,115 +1,115 @@
 .succesContainer {
-  width: 100%;
-  height: calc(100vh - 68px);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  direction: rtl;
-  overflow-y: auto;
+   width: 100%;
+   height: calc(100vh - 68px);
+   display: flex;
+   flex-direction: column;
+   align-items: center;
+   justify-content: center;
+   direction: rtl;
+   overflow-y: auto;
 }
 .success {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+   width: 100%;
+   display: flex;
+   flex-direction: column;
+   align-items: center;
+   justify-content: center;
 }
 
 .success img {
-  width: 50px;
+   width: 50px;
 }
 h3 {
-  font-size: 20px;
-  color: #89b242;
+   font-size: 20px;
+   color: #89b242;
 }
 .progressBar {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: space-around;
-  flex-direction: column;
+   width: 100%;
+   display: flex;
+   align-items: center;
+   justify-content: space-around;
+   flex-direction: column;
 }
 small {
-  width: 100px;
-  margin-left: 5px;
-  direction: rtl;
-  font-size: 16px;
-  text-align: center;
+   width: 100px;
+   margin-left: 5px;
+   direction: rtl;
+   font-size: 16px;
+   text-align: center;
 }
 p {
-  font-size: 12px;
-  direction: rtl;
+   font-size: 12px;
+   direction: rtl;
 }
 .bar {
-  width: 80%;
-  margin: 0 auto;
-  height: 15px;
-  border-radius: 50px;
-  background-color: #fff;
-  border: 2px solid #111;
-  position: relative;
-  display: flex;
-  justify-content: space-around;
+   width: 80%;
+   margin: 0 auto;
+   height: 15px;
+   border-radius: 50px;
+   background-color: #fff;
+   border: 2px solid #111;
+   position: relative;
+   display: flex;
+   justify-content: space-around;
 }
 
 .progressTime {
-  height: 100%;
-  left: 0;
-  top: 0;
-  position: absolute;
-  border-top-left-radius: 50px;
-  border-bottom-left-radius: 50px;
-  background-color: #f0ab0e;
+   height: 100%;
+   left: 0;
+   top: 0;
+   position: absolute;
+   border-top-left-radius: 50px;
+   border-bottom-left-radius: 50px;
+   background-color: #f0ab0e;
 }
 
 .bar .successBar {
-  position: absolute;
-  left: 0;
-  top: 0;
-  height: 100%;
-  width: 50%;
-  border-bottom-left-radius: 50px;
-  border-top-left-radius: 50px;
-  background-color: #000;
+   position: absolute;
+   left: 0;
+   top: 0;
+   height: 100%;
+   width: 50%;
+   border-bottom-left-radius: 50px;
+   border-top-left-radius: 50px;
+   background-color: #000;
 }
 
 .thanksContent {
-  text-align: center;
-  color: #4a4545;
-  font-size: 21px;
-  // padding: 0 5px;
+   text-align: center;
+   color: #4a4545;
+   font-size: 21px;
+   // padding: 0 5px;
 }
 .thanksContent .fa-heart {
-  font-size: 40px;
+   font-size: 40px;
 }
 .endButton {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  flex-direction: column;
-  margin-top: 20px;
+   width: 100%;
+   display: flex;
+   align-items: center;
+   flex-direction: column;
+   margin-top: 20px;
 }
 .endButton img {
-  width: 30%;
-  margin-left: 30%;
+   width: 30%;
+   margin-left: 30%;
 }
 button {
-  width: 80%;
+   width: 80%;
 }
 
 p {
-  color: #4a4545;
+   color: #4a4545;
 }
-p span {
-  color: #d1372a;
-  text-decoration: underline;
+p a {
+   color: #d1372a;
+   text-decoration: underline;
 }
 @media (max-height: 600px) {
-  .succesContainer {
-    overflow-y: auto;
-  }
-  .endButton img {
-    width: 30%;
-  }
+   .succesContainer {
+      overflow-y: auto;
+   }
+   .endButton img {
+      width: 30%;
+   }
 }
