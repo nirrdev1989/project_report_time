@@ -5,16 +5,13 @@
  * auth session
  */
 function authSession(request, response, next) {
-    if (!request.session.user) {
-
-        destroySession(request)
-
-        console.log('MIDDELE WERE SESSION')
-        return response.status(401).send({
-            message: 'Unauthorized'
-        })
-    }
-    next()
+   if (!request.session.user) {
+      destroySession(request)
+      return response.status(401).send({
+         message: 'Unauthorized'
+      })
+   }
+   next()
 }
 
 /**
@@ -23,11 +20,11 @@ function authSession(request, response, next) {
  * destroy user session 
  */
 function destroySession(request) {
-    request.session.destroy()
-    request.session = null
+   request.session.destroy()
+   request.session = null
 }
 
 module.exports = {
-    authSession,
-    destroySession
+   authSession,
+   destroySession
 }

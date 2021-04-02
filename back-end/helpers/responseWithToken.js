@@ -3,7 +3,6 @@ const { createToken } = require("../services/tokens");
 
 
 function responseWithToken(data, user, response) {
-   console.log(data, user)
 
    const token = createToken({
       teacherId: user.userId,
@@ -22,7 +21,7 @@ function responseWithToken(data, user, response) {
 
    response.status(201).send({
       ...data,
-      token: token
+      // token: token
    })
 }
 

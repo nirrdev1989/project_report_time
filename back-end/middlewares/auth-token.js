@@ -29,9 +29,6 @@ exports.verifyToken = catchAsync(async function (request, response, next) {
       return
    }
 
-   console.log(decodedToken, 'DECODE TOKEN')
-   console.log('IAT: ', new Date(decodedToken.iat))
-   console.log('EXP: ', new Date(decodedToken.exp))
    request.userData = {
       teacherId: decodedToken.teacherId,
       // teacherEmail: decodedToken.teacherEmail,
