@@ -4,36 +4,25 @@ const express = require("express");
 // const debug = require('debug')
 const path = require("path");
 const keys = require('./back-end/config/keys')
-const { apiNotFoundError, handleError } = require('./back-end/middlewares/global.errors')
+const { handleError } = require('./back-end/middlewares/global.errors')
 const session = require('express-session')
+const cookieParser = require('cookie-parser')
 const memoryStore = require('memorystore')(session)
-const port = process.env.PORT || 3000
 
+const app = express();
 
-const server = express();
+app.set('trust proxy', 1);
 
-
-server.set('trust proxy', 1);
-
-if (server.get('env') === 'production') {
-    /** secure middleweres if prod mode */
-    require('./back-end/prod/prod')(server)
-    process.on('uncaughtExceptions', (ex) => {
-        console.log(ex)
-        process.exit(1)
-    })
-
-    process.on('unhandledRejections', (ex) => {
-        console.log(ex)
-        process.exit(1)
-    })
+if (keys.NODE_ENV === 'production') {
+   /** secure middleweres if prod mode */
+   require('./back-end/prod/prod')(app)
 }
 
-if (server.get('env') === 'development') {
-    const morgan = require('morgan')
-    /** development mode log loggers */
-    server.use(morgan('dev'))
-    server.use(cors())
+if (keys.NODE_ENV === 'development') {
+   const morgan = require('morgan')
+   /** development mode log loggers */
+   app.use(morgan('dev'))
+   app.use(cors())
 }
 
 
@@ -41,51 +30,54 @@ const authRoutes = require("./back-end/routes/auth");
 const teacherRoutes = require('./back-end/routes/teacher')
 const signRouter = require('./back-end/routes/signature');
 
-server.use(express.json());
-server.use(express.urlencoded({ extended: true }));
-server.use(express.static(path.join(__dirname, "client/dist/reports")));
+app.use(cors({
+   origin: '*',
+   credentials: true,
+}))
+app.use(cookieParser())
+app.use(express.json({ limit: '15kb' }));
+app.use(express.urlencoded({ extended: false }));
+app.use(express.static(path.join(__dirname, "client/dist/reports")));
 
 
 /** Session confing */
-server.use(session({
-    store: new memoryStore({
-        checkPeriod: 1000 * 5
-    }),
-    secret: keys.SESSION.secretSessionKey,
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-        expires: keys.SESSION.expiresIn,
-        // httpOnly: true,
-        // PROD
-        sameSite: server.get('env') === 'production',
-        secure: server.get('env') === 'production',
-        ephemeral: server.get('env') === 'production'
-    }
+app.use(session({
+   store: new memoryStore({
+      checkPeriod: 1000 * 5
+   }),
+   secret: keys.SESSION.secretSessionKey,
+   resave: false,
+   saveUninitialized: false,
+   cookie: {
+      expires: keys.SESSION.expiresIn,
+      // httpOnly: true,
+      // PROD
+      sameSite: keys.NODE_ENV === 'production',
+      secure: keys.NODE_ENV === 'production',
+      ephemeral: keys.NODE_ENV === 'production'
+   }
 }))
 
 
 
 /** Auth routes */
-server.use("/api/auth", authRoutes)
+app.use("/api/auth", authRoutes)
 
 /**Teacher actions routes */
-server.use('/api/teacher', teacherRoutes)
+app.use('/api/teacher', teacherRoutes)
 
 /**Parent sign routes */
-server.use('/api/sign', signRouter)
+app.use('/api/sign', signRouter)
 
 
 /** response client html */
-server.get("*", (request, response) => {
-    response.sendFile(path.resolve("client/dist/reports/index.html"));
+app.get("*", (request, response) => {
+   response.sendFile(path.resolve("client/dist/reports/index.html"));
 });
 
-
 /** Errors handlers */
-server.use(apiNotFoundError)
-server.use(handleError)
+// app.use(apiNotFoundError)
+app.use(handleError)
 
 
-/**PORT lisining */
-server.listen(port, () => console.log("Listening at port: ", port));
+module.exports = app

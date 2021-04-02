@@ -1,14 +1,13 @@
 // const dotENV = require('dotenv')
 // dotENV.config({ path: `${__dirname}/.env` })
 
+const app = require('./app')
+const PORT = process.env.PORT || 3000
 
 process.on('uncaughtException', (error) => {
    console.log('uncaughtException', error)
    process.exit(1)
 })
-
-const PORT = process.env.PORT || 3000
-const app = require('./app')
 
 const server = app.listen(PORT, () => { console.log('Server run at port', PORT) })
 
