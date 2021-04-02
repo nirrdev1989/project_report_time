@@ -6,56 +6,63 @@ const { createToken } = require('../services/tokens')
 const { findFirstNumberOnString } = require('../helpers/numbers-on-string')
 const { emailOptions } = require("../services/emails/emails.options");
 const emailTamplate = require('../services/emails/email.tamplates')
-const { daysRange } = require('../helpers/dates.ranges')
+const { daysRange } = require('../helpers/dates.ranges');
+const catchAsync = require("../helpers/catchAsync");
+const createError = require("../helpers/error");
+const responseWithToken = require("../helpers/responseWithToken");
 
 
 
-module.exports.getStudents = async function (request, response, next) {
-    const query = `select * where F=${Number(request.userData.teacherId)}`;
-    const sheetId = keys.GOOGLE_SHEETS.sheetsIds.childrens
-
-    try {
-        const sdudents = await googleSheetsService.find(
-            query,
-            sheetId,
-            request.sheetsClientData.authorizationToken,
-        )
-
-        if (!sdudents) {
-            return response.status(200).send([]);
-        }
-
-        const toJson = convertSheetsDataToObjectsArray(sdudents, 'CHILDRENS')
-
-        request.session.user.studentsList = toJson
-
-        response.status(200).send(toJson)
-    } catch (error) {
-        next(error)
-    }
-}
+exports.getStudents = catchAsync(async function (request, response, next) {
+   const query = `select * where F=${Number(request.userData.teacherId)}`;
+   const sheetId = keys.GOOGLE_SHEETS.sheetsIds.childrens
 
 
-module.exports.createReport = async function (request, response, next) {
-    if (request.findReport) {
-        return response.status(400).send({
-            message: 'דיווח לא חוקי יתכן שבוצע דיווח כפול ליום זה'
-        })
-    }
-    const {
-        studentName,
-        ticketNo,
-        reportDate,
-        reportActivitis,
-        reportComments,
-        reportStartTime,
-        reportEndTime,
-        reportRangeTimne,
-        parentEmail } = request.body
+   const sdudents = await googleSheetsService.find(
+      query,
+      sheetId,
+      request.sheetsClientData.authorizationToken,
+   )
 
-    const nowDate = new Date().toDateString()
+   if (!sdudents) {
+      return response.status(200).send([]);
+   }
 
-    let body = `{"values":[
+   const toJson = convertSheetsDataToObjectsArray(sdudents, 'CHILDRENS')
+
+   request.session.user.studentsList = toJson
+
+   return responseWithToken({
+      tokenExpiresIn: keys.TOKENS.ACCESS_TOKEN.expiresIn,
+      toJson: toJson
+      // userName: firstName,
+   },
+      { userId: request.userData.teacherId },
+      response
+   )
+})
+
+
+exports.createReport = catchAsync(async function (request, response, next) {
+   if (request.findReport) {
+      next(createError(400, 'דיווח לא חוקי יתכן שבוצע דיווח כפול ליום זה'))
+      return
+   }
+
+   const {
+      studentName,
+      ticketNo,
+      reportDate,
+      reportActivitis,
+      reportComments,
+      reportStartTime,
+      reportEndTime,
+      reportRangeTimne,
+      parentEmail } = request.body
+
+   const nowDate = new Date().toDateString()
+
+   let body = `{"values":[
         [
             "${reportDate}",
             "${reportStartTime}",
@@ -72,184 +79,185 @@ module.exports.createReport = async function (request, response, next) {
         ]
     ]}`
 
+   const reportCreated = await googleSheetsService.save(
+      body,
+      keys.GOOGLE_SHEETS.sheetsNames.reports,
+      request.sheetsClientData.authorizationToken,
+      'REPORTS'
+   )
 
-    try {
-        const reportCreated = await googleSheetsService.save(
-            body,
-            keys.GOOGLE_SHEETS.sheetsNames.reports,
-            request.sheetsClientData.authorizationToken
-        )
+   if (reportCreated.updates.updatedRows > 0) {
+      const token = createToken({
+         studentName: studentName,
+         ticketNo: ticketNo,
+         reportDate: reportDate,
+         reportActivitis: reportActivitis,
+         reportComments: reportComments,
+         reportStartTime: reportStartTime,
+         reportEndTime: reportEndTime,
+         reportRangeTimne: reportRangeTimne,
+         index: findFirstNumberOnString(reportCreated.updates.updatedRange)
+      },
+         keys.TOKENS.PARENT_SIGN_ACCESS_TOKEN.secretTokenKey,
+         keys.TOKENS.PARENT_SIGN_ACCESS_TOKEN.expiresIn
+      )
 
+      const options = emailOptions(parentEmail, emailTamplate.parentSign(token))
+      sendMail(options)
 
-        if (reportCreated.updates.updatedRows > 0) {
-            // console.log(reportCreated.updates)
-            const token = createToken({
-                studentName: studentName,
-                ticketNo: ticketNo,
-                reportDate: reportDate,
-                reportActivitis: reportActivitis,
-                reportComments: reportComments,
-                reportStartTime: reportStartTime,
-                reportEndTime: reportEndTime,
-                reportRangeTimne: reportRangeTimne,
-                index: findFirstNumberOnString(reportCreated.updates.updatedRange)
-            },
-                keys.TOKENS.PARENT_SIGN_ACCESS_TOKEN.secretTokenKey,
-                keys.TOKENS.PARENT_SIGN_ACCESS_TOKEN.expiresIn
-            )
-
-            const options = emailOptions(parentEmail, emailTamplate.parentSign(token))
-            sendMail(options)
-
-            request.session.user.reportsList = []
-
-            return response.status(200).send({
-                message: 'REPORT CREATED',
-                index: findFirstNumberOnString(reportCreated.updates.updatedRange),
-
-            })
-        }
-
-        response.status(401).send({
-            message: "REPORT CREATED FAIL",
-        });
-
-    } catch (error) {
-        next(error)
-    }
-}
+      request.session.user.reportsList = []
 
 
-module.exports.getReportsUnConfirm = async function (request, response, next) {
-    const sheetId = keys.GOOGLE_SHEETS.sheetsIds.reports
-    const query = `select A,B,C,D,E,F,I,L,M where J=${Number(request.userData.teacherId)}and G=${false}`;
-    // console.log(request.session.user)
-    try {
-        const reports = await googleSheetsService.find(
-            query,
-            sheetId,
-            request.sheetsClientData.authorizationToken
-        )
+      return responseWithToken({
+         tokenExpiresIn: keys.TOKENS.ACCESS_TOKEN.expiresIn,
+         message: 'REPORT CREATED',
+         index: findFirstNumberOnString(reportCreated.updates.updatedRange),
+         // userName: firstName,
+      },
+         { userId: request.userData.teacherId },
+         response
+      )
+   } else {
+      next(createError(401, "REPORT CREATED FAIL"))
+   }
 
-        if (!reports) {
-            return response.status(200).send([]);
-        }
-
-        const toJson = convertSheetsDataToObjectsArray(reports, 'REPORTS')
-        // console.log(toJson)
-        request.session.user.reportsList = toJson
-
-        return response.status(200).send(toJson)
-    } catch (error) {
-        next(error)
-    }
-}
+})
 
 
-module.exports.getReportsStats = async function (request, response, next) {
-    const sheetId = keys.GOOGLE_SHEETS.sheetsIds.stats
-    const qurey = `select B,C,D where A=${Number(request.userData.teacherId)}`
+exports.getReportsUnConfirm = catchAsync(async function (request, response, next) {
+   const sheetId = keys.GOOGLE_SHEETS.sheetsIds.reports
+   const query = `select A,B,C,D,E,F,I,L,M where J=${Number(request.userData.teacherId)}and G=${false}`;
 
-    try {
-        const repostsStats = await googleSheetsService.find(
-            qurey,
-            sheetId,
-            request.sheetsClientData.authorizationToken
-        )
+   const reports = await googleSheetsService.find(
+      query,
+      sheetId,
+      request.sheetsClientData.authorizationToken,
+      'REPORTS'
+   )
 
-        const toJson = convertSheetsDataToObjectsArray(repostsStats, 'REPORTS_STATS')[0]
+   if (!reports) {
+      return response.status(200).send([]);
+   }
 
-        response.status(200).send(toJson);
-    } catch (error) {
-        next(error)
-    }
-}
+   const toJson = convertSheetsDataToObjectsArray(reports, 'REPORTS')
 
+   request.session.user.reportsList = toJson
 
-module.exports.resendParentSign = async function (request, response, next) {
-    // console.log(request.findReport)
-    if (!request.findReport) {
-        return response.status(404).send({
-            message: "INVALID REPORT",
-        });
-
-    }
-
-    const {
-        ticketNo,
-        reportDate,
-        reportActivitis,
-        reportComments,
-        reportStartTime,
-        reportEndTime,
-        reportRangeTimne,
-        lastResendDateToParent } = request.findReport
-
-    const {
-        studentName,
-        parentEmail,
-        index } = request.body
+   // return response.status(200).send(toJson)
 
 
-    const today = new Date().getTime()
-    const lastDateResendSign = new Date(lastResendDateToParent).getTime()
+   return responseWithToken({
+      tokenExpiresIn: keys.TOKENS.ACCESS_TOKEN.expiresIn,
+      toJson: toJson
+      // userName: firstName,
+   },
+      { userId: request.userData.teacherId },
+      response
+   )
+})
 
-    if (daysRange(today, lastDateResendSign) < 1) {
-        return response.status(400).send({
-            message: "INVALID REQUEST",
-        });
-    }
 
-    const sheetName = keys.GOOGLE_SHEETS.sheetsNames.reports
-    const range = `!L${Number(index) + 1}`
+exports.getReportsStats = catchAsync(async function (request, response, next) {
+   const sheetId = keys.GOOGLE_SHEETS.sheetsIds.stats
+   const qurey = `select B,C,D where A=${Number(request.userData.teacherId)}`
 
-    let body = `{"values":[
+   const repostsStats = await googleSheetsService.find(
+      qurey,
+      sheetId,
+      request.sheetsClientData.authorizationToken
+   )
+
+   const toJson = convertSheetsDataToObjectsArray(repostsStats, 'REPORTS_STATS')[0]
+
+   return responseWithToken({
+      tokenExpiresIn: keys.TOKENS.ACCESS_TOKEN.expiresIn,
+      toJson: toJson
+      // userName: firstName,
+   },
+      { userId: request.userData.teacherId },
+      response
+   )
+})
+
+
+exports.resendParentSign = catchAsync(async function (request, response, next) {
+   if (!request.findReport) {
+      next(createError(404, "INVALID REPORT"))
+      return
+   }
+
+   const {
+      ticketNo,
+      reportDate,
+      reportActivitis,
+      reportComments,
+      reportStartTime,
+      reportEndTime,
+      reportRangeTimne,
+      lastResendDateToParent } = request.findReport
+
+   const {
+      studentName,
+      parentEmail,
+      index } = request.body
+
+
+   const today = new Date().getTime()
+   const lastDateResendSign = new Date(lastResendDateToParent).getTime()
+
+   if (daysRange(today, lastDateResendSign) < 1) {
+      next(createError(400, "INVALID REQUEST"))
+      return
+   }
+
+   const sheetName = keys.GOOGLE_SHEETS.sheetsNames.reports
+   const range = `!L${Number(index) + 1}`
+
+   let body = `{"values":[
             [
                 "${new Date().toDateString()}"
             ]
         ]}`
 
-    try {
-        const updateDateParent = await googleSheetsService.update(
-            range,
-            sheetName,
-            body,
-            request.sheetsClientData.authorizationToken
-        )
 
-        // console.log(updateDateParent)
-        if (updateDateParent.updatedColumns > 0) {
-            const token = createToken({
-                studentName: studentName,
-                ticketNo: ticketNo,
-                reportDate: reportDate,
-                reportActivitis: reportActivitis,
-                reportComments: reportComments,
-                reportStartTime: reportStartTime,
-                reportEndTime: reportEndTime,
-                reportRangeTimne: reportRangeTimne,
-                index: Number(index) + 1
-            },
-                keys.TOKENS.PARENT_SIGN_ACCESS_TOKEN.secretTokenKey,
-                keys.TOKENS.PARENT_SIGN_ACCESS_TOKEN.expiresIn
-            )
+   const updateDateParent = await googleSheetsService.update(
+      range,
+      sheetName,
+      body,
+      request.sheetsClientData.authorizationToken
+   )
 
-            const options = emailOptions(parentEmail, emailTamplate.parentSign(token))
-            sendMail(options)
+   // console.log(updateDateParent)
+   if (updateDateParent.updatedColumns > 0) {
+      const token = createToken({
+         studentName: studentName,
+         ticketNo: ticketNo,
+         reportDate: reportDate,
+         reportActivitis: reportActivitis,
+         reportComments: reportComments,
+         reportStartTime: reportStartTime,
+         reportEndTime: reportEndTime,
+         reportRangeTimne: reportRangeTimne,
+         index: Number(index) + 1
+      },
+         keys.TOKENS.PARENT_SIGN_ACCESS_TOKEN.secretTokenKey,
+         keys.TOKENS.PARENT_SIGN_ACCESS_TOKEN.expiresIn
+      )
 
-            request.session.user.reportsList = []
+      const options = emailOptions(parentEmail, emailTamplate.parentSign(token))
+      sendMail(options)
 
-            return response.status(200).send({
-                message: 'UPDATE RESEND DATE PARENT SIGN'
-            })
-        }
+      request.session.user.reportsList = []
 
-        response.status(401).send({
-            message: "UPDATE RESEND SIGN PARENT FAIL",
-        });
+      return responseWithToken({
+         tokenExpiresIn: keys.TOKENS.ACCESS_TOKEN.expiresIn,
+         message: 'UPDATE RESEND DATE PARENT SIGN'
+         // userName: firstName,
+      },
+         { userId: request.userData.teacherId },
+         response
+      )
+   }
 
-    } catch (error) {
-        next(error)
-    }
-
-}
+   next(createError(400, "UPDATE RESEND SIGN PARENT FAIL"))
+})
