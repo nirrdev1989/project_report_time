@@ -6,38 +6,41 @@ import { Report } from '../interfaces/Report';
 import { ReportsService } from './reports.service';
 
 @Injectable({
-    providedIn: 'root'
+   providedIn: 'root'
 })
 export class SignService {
 
-    private token: string
+   private token: string
+   private baseUrl: string
 
 
-    constructor(private http: HttpClient, private reportsService: ReportsService) { }
+   constructor(private http: HttpClient, private reportsService: ReportsService) {
+      this.baseUrl = 'api/v1/sign'
+   }
 
-    // POST VERIFY PARENT TOKEN
-    verifyToken(token: string): Observable<Report> {
-        return this.http.post<Report>('api/sign/verify/parent-token', { token: token })
-            .pipe(
-                tap((result) => {
-                    if (result) {
-                        this.token = token
-                        this.reportsService.setReport(result)
-                    }
-                })
-            )
-    }
+   // POST VERIFY PARENT TOKEN
+   verifyToken(token: string): Observable<Report> {
+      return this.http.post<Report>(`${this.baseUrl}/verify/parent-token`, { token: token })
+         .pipe(
+            tap((result) => {
+               if (result) {
+                  this.token = token
+                  this.reportsService.setReport(result)
+               }
+            })
+         )
+   }
 
-    // POST  PARENT SIGN
-    sendSign(singImageBase64: Blob): Observable<string> {
-        return this.http.post<{
-            message: string
-        }>('api/sign/parent', { singImageBase64: singImageBase64, token: this.token })
-            .pipe(
-                map((result) => {
-                    // console.log(result)
-                    return result.message
-                })
-            )
-    }
+   // POST  PARENT SIGN
+   sendSign(singImageBase64: Blob): Observable<string> {
+      return this.http.post<{
+         message: string
+      }>(`${this.baseUrl}/parent`, { singImageBase64: singImageBase64, token: this.token })
+         .pipe(
+            map((result) => {
+               // console.log(result)
+               return result.message
+            })
+         )
+   }
 }

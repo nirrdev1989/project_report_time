@@ -10,6 +10,7 @@ import { formatDate } from "../services/helpers/time.range"
    providedIn: "root",
 })
 export class ReportsService {
+   private baseUrl: string
    private report: Report;
    private reports: Report[]
    private reportsChange: BehaviorSubject<Report[]>
@@ -18,6 +19,7 @@ export class ReportsService {
 
 
    constructor(private http: HttpClient, private router: Router) {
+      this.baseUrl = 'api/v1/teacher'
       this.reports = []
       this.report = null
       this.reportChange = new BehaviorSubject<Report>(this.report)
@@ -59,7 +61,7 @@ export class ReportsService {
          message: string,
          index: number,
          tokenExpiresIn: number
-      }>('api/teacher/create-report', report)
+      }>(`${this.baseUrl}/create-report`, report)
          .pipe(
             map((result) => {
                console.log(result, report)
@@ -75,7 +77,7 @@ export class ReportsService {
 
    // GET TEACHER STATS
    getMountlyStats(): Observable<ReportStats> {
-      return this.http.get<{ tokenExpiresIn: number, toJson: ReportStats }>('api/teacher/reports/stats')
+      return this.http.get<{ tokenExpiresIn: number, toJson: ReportStats }>(`${this.baseUrl}/reports/stats`)
          .pipe(
             map((result) => {
                return result.toJson
@@ -88,7 +90,7 @@ export class ReportsService {
       if (this.reports.length > 0) {
          return of(this.reports);
       }
-      return this.http.get<{ tokenExpiresIn: number, toJson: Report[] }>("api/teacher/reports-unconfirm")
+      return this.http.get<{ tokenExpiresIn: number, toJson: Report[] }>(`${this.baseUrl}/reports-unconfirm`)
          .pipe(
             tap((result: any) => {
                this.reports = result.toJson;
@@ -111,7 +113,7 @@ export class ReportsService {
       return this.http.post<{
          message: string,
          tokenExpiresIn: number
-      }>('api/teacher/resend/parent-sign', reportInfo)
+      }>(`${this.baseUrl}/resend/parent-sign`, reportInfo)
          .pipe(
             map((result) => {
                const findIndex = this.reports.findIndex((r) => r.index == report.index)

@@ -10,9 +10,9 @@ import { Student } from '../interfaces/Student';
 export class StudentsService {
 
    private students: Student[]
-
+   private baseUrl: string
    constructor(private http: HttpClient) {
-
+      this.baseUrl = 'api/v1/teacher'
    }
 
    // GET STUDENTS LIST
@@ -20,7 +20,7 @@ export class StudentsService {
       if (this.students) {
          return of(this.students);
       }
-      return this.http.get<Student[]>("api/v1/teacher/students")
+      return this.http.get<Student[]>(`${this.baseUrl}/students`)
          .pipe(
             map((result: any) => {
                this.students = result.toJson;

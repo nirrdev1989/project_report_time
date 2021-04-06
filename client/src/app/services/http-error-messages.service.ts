@@ -25,7 +25,6 @@ export class HttpErrorMessagesService {
       return this.errorMessageChnage.asObservable();
    }
 
-
    setMessage(message: string): void {
       this.errorMessage = message;
       this.errorMessageChnage.next(this.errorMessage);
@@ -45,6 +44,7 @@ export class HttpErrorMessagesService {
       console.log(errorMassge)
       this.setMessage(errorMassge)
       if (errorMassge === 'SERVER ERROR' || error.status >= 500) {
+         this.authService.clearLoginInfo()
          this.router.navigate(['not-found'])
          return
       }
