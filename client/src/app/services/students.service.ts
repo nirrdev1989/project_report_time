@@ -17,14 +17,12 @@ export class StudentsService {
 
    // GET STUDENTS LIST
    getStudents(): Observable<Student[]> {
-      console.log(this.students)
       if (this.students) {
          return of(this.students);
       }
-      return this.http.get<Student[]>("api/teacher/students")
+      return this.http.get<Student[]>("api/v1/teacher/students")
          .pipe(
             map((result: any) => {
-               console.log(alert(JSON.stringify(result)))
                this.students = result.toJson;
                return result.toJson
             })

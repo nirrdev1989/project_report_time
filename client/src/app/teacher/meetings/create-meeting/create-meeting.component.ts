@@ -52,7 +52,6 @@ export class CreateMeetingComponent implements OnInit, AfterContentInit, OnDestr
    ngOnInit(): void {
       this.subStudents = this.studentsService.getStudents()
          .subscribe((result) => {
-            console.log(result)
             this.students = result;
          });
 
@@ -62,8 +61,6 @@ export class CreateMeetingComponent implements OnInit, AfterContentInit, OnDestr
          ]],
          meetingDate: [null, [
             Validators.required,
-            // FormsValidatorsService.limitDate(90),
-            // FormsValidatorsService.blockOverDate,
          ]],
          times: this.formBuilder.group({
             meetingStartTime: ['', []],
