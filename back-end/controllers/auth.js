@@ -8,6 +8,7 @@ const { convertSheetsDataToObjectsArray } = require('../helpers/tojson');
 const catchAsync = require("../helpers/catchAsync");
 const createError = require("../helpers/error");
 const responseWithToken = require("../helpers/responseWithToken");
+const { destroySession } = require("../middlewares/auth-session");
 
 
 exports.userIsLogged = catchAsync(async function (request, response, next) {
@@ -120,6 +121,9 @@ exports.logout = function (request, response, next) {
       expires: new Date(Date.now() + 1000 * 5),
       httpOnly: true
    })
+   response.clearCookie('connect.sid')
+
+   destroySession(request)
 
    console.log('LOGOUT')
 

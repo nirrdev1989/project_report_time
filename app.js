@@ -22,7 +22,10 @@ if (keys.NODE_ENV === 'development') {
    const morgan = require('morgan')
    /** development mode log loggers */
    app.use(morgan('dev'))
-   app.use(cors())
+   app.use(cors({
+      origin: keys.ORIGIN,
+      credentials: true,
+   }))
 }
 
 
@@ -30,10 +33,6 @@ const authRoutes = require("./back-end/routes/auth");
 const teacherRoutes = require('./back-end/routes/teacher')
 const signRouter = require('./back-end/routes/signature');
 
-app.use(cors({
-   origin: '*',
-   credentials: true,
-}))
 app.use(cookieParser())
 app.use(express.json({ limit: '15kb' }));
 app.use(express.urlencoded({ extended: false }));
@@ -61,13 +60,13 @@ app.use(session({
 
 
 /** Auth routes */
-app.use("/api/auth", authRoutes)
+app.use("/api/v1/auth", authRoutes)
 
 /**Teacher actions routes */
-app.use('/api/teacher', teacherRoutes)
+app.use('/api/v1/teacher', teacherRoutes)
 
 /**Parent sign routes */
-app.use('/api/sign', signRouter)
+app.use('/api/v1/sign', signRouter)
 
 
 /** response client html */
