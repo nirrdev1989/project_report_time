@@ -26,11 +26,10 @@ export class AuthInterceptor implements HttpInterceptor {
                this.authService.clearTimer()
                this.authService.setTokenTimer(res.confirmCodeExpire)
             }
-            console.log(res)
+            // console.log(res)
          })
       )
    }
-
 
    private cloneToken(request: HttpRequest<unknown>): HttpRequest<unknown> {
       return request.clone({

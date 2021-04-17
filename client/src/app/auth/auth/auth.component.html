@@ -1,15 +1,9 @@
 <ng-container *ngIf="!authProccess; then email else codeConfirm"></ng-container>
 
-<!-- <div class="animate-center"> -->
 <ng-template #email>
-    <app-email *ngIf="!authProccess"></app-email>
+   <app-email *ngIf="!authProccess"></app-email>
 </ng-template>
-<!-- </div> -->
 
-<!-- <div class="animate-center"> -->
 <ng-template #codeConfirm>
-    <app-confirm *ngIf="authProccess"></app-confirm>
+   <app-confirm *ngIf="authProccess"></app-confirm>
 </ng-template>
-<!-- </div> -->
-
-<!-- <app-confirm></app-confirm> -->
